@@ -598,11 +598,11 @@ ts_chunk_insert_state_create(const Chunk *chunk, ChunkDispatch *dispatch)
 		elog(ERROR, "insert is not on a table");
 
 	if (has_compressed_chunk &&
-		(onconflict_action != ONCONFLICT_NONE || ts_chunk_dispatch_has_returning(dispatch)))
+		((onconflict_action != ONCONFLICT_NONE && onconflict_action != ONCONFLICT_NOTHING) || ts_chunk_dispatch_has_returning(dispatch)))
 		ereport(ERROR,
 				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
-				 errmsg("insert with ON CONFLICT or RETURNING clause is not supported on "
-						"compressed chunks")));
+				 errmsg("insert with ON CONFLICT or RETURNING clause is only supported with "
+						"DO NOTHING on compressed chunks")));
 
 	/*
 	 * We must allocate the range table entry on the executor's per-query
