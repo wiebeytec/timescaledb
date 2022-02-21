@@ -611,7 +611,7 @@ ts_chunk_insert_state_create(const Chunk *chunk, ChunkDispatch *dispatch)
 	old_mcxt = MemoryContextSwitchTo(dispatch->estate->es_query_cxt);
 
 	rel = table_open(chunk->table_id, RowExclusiveLock);
-	if (has_compressed_chunk && ts_indexing_relation_has_primary_or_unique_index(rel))
+	if (has_compressed_chunk && ts_indexing_relation_has_primary_or_unique_index(rel) && onconflict_action != ONCONFLICT_NOTHING)
 	{
 		table_close(rel, RowExclusiveLock);
 		ereport(ERROR,
@@ -640,7 +640,7 @@ ts_chunk_insert_state_create(const Chunk *chunk, ChunkDispatch *dispatch)
 
 	if (resrelinfo->ri_RelationDesc->rd_rel->relhasindex &&
 		resrelinfo->ri_IndexRelationDescs == NULL)
-		ExecOpenIndices(resrelinfo, onconflict_action != ONCONFLICT_NONE);
+		ExecOpenIndices(resrelinfo, onconflict_action != ONCONFLICT_NONE && onconflict_action != ONCONFLICT_NOTHING);
 
 	if (relinfo->ri_TrigDesc != NULL)
 	{
